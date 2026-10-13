@@ -24,4 +24,12 @@ export const api = {
     fetch(`${BASE}${path}`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify(body) }).then(handle),
   del: (path) =>
     fetch(`${BASE}${path}`, { method: 'DELETE', headers: getHeaders() }).then(handle),
+  uploadFile: (path, formData) => {
+    const token = localStorage.getItem('token')
+    return fetch(`${BASE}${path}`, {
+      method: 'POST',
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: formData,
+    }).then(handle)
+  },
 }

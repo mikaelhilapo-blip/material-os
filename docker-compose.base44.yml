@@ -21,6 +21,7 @@ services:
     volumes:
       - ./:/app
       - /app/backend/node_modules
+      - uploads:/app/backend/uploads
     env_file:
       - ./.env.base44-defaults
       - /run/base44/app.env
@@ -64,3 +65,4 @@ services:
 
 volumes:
   pgdata:
+  uploads:

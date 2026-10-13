@@ -24,6 +24,8 @@ model Material {
   brand       String?
   supplier    String?
   price       String?
+  priceAmount String?
+  priceUnit   String?
   sizes       String?
   finish      String?
   notes       String?

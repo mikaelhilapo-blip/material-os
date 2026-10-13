@@ -1,9 +1,37 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { requireAuth, optionalAuth } from '../middleware/auth.js'
+import multer from 'multer'
+import fs from 'fs'
+import path from 'path'
 
 const router = Router()
 const prisma = new PrismaClient()
+
+// Ensure uploads directory exists
+const uploadsDir = path.resolve('uploads')
+fs.mkdirSync(uploadsDir, { recursive: true })
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: uploadsDir,
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname)
+      cb(null, `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`)
+    }
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true)
+    else cb(null, false)
+  }
+})
+
+// Upload material image
+router.post('/upload', requireAuth, upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Please select an image file (PNG, JPG, etc.)' })
+  res.json({ url: `/api/uploads/${req.file.filename}` })
+})
 
 // List materials: supplier listings (public) + user's own (private)
 router.get('/', optionalAuth, async (req, res) => {
