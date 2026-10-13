@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  materials    Material[]
+  projects     Project[]
+  createdAt    DateTime  @default(now())
+}
+
+model Material {
+  id          String   @id @default(uuid())
+  name        String
+  category    String
+  brand       String?
+  supplier    String?
+  price       String?
+  sizes       String?
+  finish      String?
+  notes       String?
+  image       String?
+  composition String?
+  durability  String?
+  performance String?
+  maintenance String?
+  availability String?
+  warranty    String?
+  source      String   // "SUPPLIER_LISTING" | "USER_CREATED"
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects    ProjectMaterial[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([source])
+  @@index([userId])
+  @@index([category])
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  materials   ProjectMaterial[]
+  createdAt   DateTime @default(now())
+}
+
+model ProjectMaterial {
+  id         String   @id @default(uuid())
+  projectId  String
+  materialId String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([projectId, materialId])
+  @@index([materialId])
+}
